@@ -2,9 +2,16 @@ cc_library_shared {
     name: "libstagefright_wfd",
 
     srcs: [
+        "MediaReceiver.cpp",
         "MediaSender.cpp",
         "Parameters.cpp",
+        "rtp/RTPAssembler.cpp",
+        "rtp/RTPReceiver.cpp",
         "rtp/RTPSender.cpp",
+        "sink/DirectRenderer.cpp",
+        "sink/WifiDisplaySink.cpp",
+        "SNTPClient.cpp",
+        "TimeSyncer.cpp",
         "source/Converter.cpp",
         "source/MediaPuller.cpp",
         "source/PlaybackSession.cpp",
@@ -22,6 +29,7 @@ cc_library_shared {
     ],
 
     shared_libs: [
+        "libaudioclient",
         "libbinder",
         "libcutils",
         "liblog",
@@ -35,7 +43,7 @@ cc_library_shared {
 
     cflags: [
         "-Wno-multichar",
-        "-Werror",
+        //"-Werror",
         "-Wall",
     ],
 
@@ -48,4 +56,80 @@ cc_library_shared {
             cfi: true,
         },
     },
+}
+
+//###############################################################################
+
+cc_binary {
+    name: "wfd",
+
+    srcs: ["wfd.cpp"],
+
+    shared_libs: [
+        "libbinder",
+        "libgui",
+        "libmedia",
+        "libstagefright",
+        "libstagefright_foundation",
+        "libstagefright_wfd",
+        "libutils",
+        "liblog",
+    ],
+}
+
+//###############################################################################
+
+cc_binary {
+    name: "udptest",
+
+    srcs: ["udptest.cpp"],
+
+    shared_libs: [
+        "libbinder",
+        "libgui",
+        "libmedia",
+        "libstagefright",
+        "libstagefright_foundation",
+        "libstagefright_wfd",
+        "libutils",
+        "liblog",
+    ],
+}
+
+//###############################################################################
+
+cc_binary {
+    name: "rtptest",
+
+    srcs: ["rtptest.cpp"],
+
+    shared_libs: [
+        "libbinder",
+        "libgui",
+        "libmedia",
+        "libstagefright",
+        "libstagefright_foundation",
+        "libstagefright_wfd",
+        "libutils",
+        "liblog",
+    ],
+}
+
+//###############################################################################
+
+cc_binary {
+    name: "nettest",
+
+    srcs: ["nettest.cpp"],
+
+    shared_libs: [
+        "libbinder",
+        "libgui",
+        "libmedia",
+        "libstagefright",
+        "libstagefright_foundation",
+        "libstagefright_wfd",
+        "libutils",
+        "liblog",
+    ],
 }
