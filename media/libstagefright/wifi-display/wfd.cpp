@@ -113,7 +113,7 @@ void RemoteDisplayClient::onDisplayConnected(
                 mDisplayBinder, 0 /* 0 degree rotation */,
                 layerStackRect,
                 displayRect);
-
+        SurfaceComposerClient::setDisplayLayerStack(mDisplayBinder, 0);
         SurfaceComposerClient::closeGlobalTransaction();
     }
 }
@@ -329,6 +329,8 @@ int main(int argc, char **argv) {
 
     CHECK(control != NULL);
     CHECK(control->isValid());
+    Rect cropRect(displayWidth, displayHeight);
+    CHECK_EQ(control->setCrop(cropRect), (status_t)OK);
 
     SurfaceComposerClient::openGlobalTransaction();
     CHECK_EQ(control->setLayer(INT_MAX), (status_t)OK);

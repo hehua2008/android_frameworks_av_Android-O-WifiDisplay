@@ -435,6 +435,7 @@ status_t WifiDisplaySink::sendM2(int32_t sessionID) {
 
     status_t err =
         mNetSession->sendRequest(sessionID, request.c_str(), request.size());
+    //ALOGD("sendM2 session[%d] result[%d]: <<<<<<------\n%s------>>>>>>", sessionID, err, request.c_str());
 
     if (err != OK) {
         return err;
@@ -647,6 +648,7 @@ void WifiDisplaySink::onOptionsRequest(
     response.append("\r\n");
 
     status_t err = mNetSession->sendRequest(sessionID, response.c_str());
+    //ALOGD("onOptionsRequest session[%d] result[%d]: <<<<<<------\n%s------>>>>>>", sessionID, err, response.c_str());
     CHECK_EQ(err, (status_t)OK);
 
     err = sendM2(sessionID);
@@ -707,6 +709,7 @@ void WifiDisplaySink::onGetParameterRequest(
     response.append(body);
 
     status_t err = mNetSession->sendRequest(sessionID, response.c_str());
+    //ALOGD("onGetParameterRequest session[%d] result[%d]: <<<<<<------\n%s------>>>>>>", sessionID, err, response.c_str());
     CHECK_EQ(err, (status_t)OK);
 }
 
@@ -784,6 +787,7 @@ status_t WifiDisplaySink::sendSetup(int32_t sessionID, const char *uri) {
     ALOGV("request = '%s'", request.c_str());
 
     err = mNetSession->sendRequest(sessionID, request.c_str(), request.size());
+    //ALOGD("sendSetup session[%d] result[%d]: <<<<<<------\n%s------>>>>>>", sessionID, err, request.c_str());
 
     if (err != OK) {
         return err;
@@ -807,6 +811,7 @@ status_t WifiDisplaySink::sendPlay(int32_t sessionID, const char *uri) {
 
     status_t err =
         mNetSession->sendRequest(sessionID, request.c_str(), request.size());
+    //ALOGD("sendPlay session[%d] result[%d]: <<<<<<------\n%s------>>>>>>", sessionID, err, request.c_str());
 
     if (err != OK) {
         return err;
@@ -836,6 +841,7 @@ status_t WifiDisplaySink::sendIDRFrameRequest(int32_t sessionID) {
 
     status_t err =
         mNetSession->sendRequest(sessionID, request.c_str(), request.size());
+    //ALOGD("sendIDRFrameRequest session[%d] result[%d]: <<<<<<------\n%s------>>>>>>", sessionID, err, request.c_str());
 
     if (err != OK) {
         return err;
@@ -877,6 +883,7 @@ void WifiDisplaySink::onSetParameterRequest(
     response.append("\r\n");
 
     status_t err = mNetSession->sendRequest(sessionID, response.c_str());
+    //ALOGD("onSetParameterRequest session[%d] result[%d]: <<<<<<------\n%s------>>>>>>", sessionID, err, response.c_str());
     CHECK_EQ(err, (status_t)OK);
 }
 
@@ -894,6 +901,7 @@ void WifiDisplaySink::sendErrorResponse(
     response.append("\r\n");
 
     status_t err = mNetSession->sendRequest(sessionID, response.c_str());
+    //ALOGD("sendErrorResponse session[%d] result[%d]: <<<<<<------\n%s------>>>>>>", sessionID, err, response.c_str());
     CHECK_EQ(err, (status_t)OK);
 }
 

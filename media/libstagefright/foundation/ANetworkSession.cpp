@@ -521,7 +521,7 @@ status_t ANetworkSession::Session::readMore() {
     return err;
 }
 
-void ANetworkSession::Session::dumpFragmentStats(const Fragment & /* frag */) {
+void ANetworkSession::Session::dumpFragmentStats(const Fragment &frag) {
 #if 0
     int64_t nowUs = ALooper::GetNowUs();
     int64_t delayMs = (nowUs - frag.mTimeUs) / 1000ll;
@@ -542,8 +542,8 @@ void ANetworkSession::Session::dumpFragmentStats(const Fragment & /* frag */) {
     }
 
     ALOGI("[%lld]: (%4lld ms) %s\n",
-          frag.mTimeUs / 1000,
-          delayMs,
+          (long long)(frag.mTimeUs / 1000),
+          (long long)delayMs,
           kPattern + kPatternSize - n);
 #endif
 }
@@ -1218,6 +1218,9 @@ status_t ANetworkSession::sendRequest(
     status_t err = session->sendRequest(data, size, timeValid, timeUs);
 
     interrupt();
+
+    //ALOGD("sendRequest() session[%d] result[%d]: <<<<<<------", sessionID, err);
+    //ALOGD("%s------>>>>>>", (const char *)data);
 
     return err;
 }

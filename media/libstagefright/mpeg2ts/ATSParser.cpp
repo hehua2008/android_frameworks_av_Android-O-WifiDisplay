@@ -1518,8 +1518,8 @@ void ATSParser::Stream::onPayloadData(
 #if 0
     ALOGI("payload streamType 0x%02x, PTS = 0x%016llx, dPTS = %lld",
           mStreamType,
-          PTS,
-          (int64_t)PTS - mPrevPTS);
+          (long long)PTS,
+          (long long)PTS - mPrevPTS);
     mPrevPTS = PTS;
 #endif
 
@@ -1551,14 +1551,14 @@ void ATSParser::Stream::onPayloadData(
                 ALOGV("Stream PID 0x%08x of type 0x%02x now has data.",
                      mElementaryPID, mStreamType);
 
-                const char *mime;
+                /*const char *mime;
                 if (meta->findCString(kKeyMIMEType, &mime)
                         && !strcasecmp(mime, MEDIA_MIMETYPE_VIDEO_AVC)) {
                     int32_t sync = 0;
                     if (!accessUnit->meta()->findInt32("isSync", &sync) || !sync) {
                         continue;
                     }
-                }
+                }*/
                 mSource = new AnotherPacketSource(meta);
                 mSource->queueAccessUnit(accessUnit);
                 ALOGV("onPayloadData: created AnotherPacketSource PID 0x%08x of type 0x%02x",

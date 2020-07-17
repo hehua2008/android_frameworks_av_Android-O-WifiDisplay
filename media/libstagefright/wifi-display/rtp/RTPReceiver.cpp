@@ -709,7 +709,8 @@ status_t RTPReceiver::informSender(const sp<AMessage> &params) {
     ptr[26] = (maxLatencyUs >> 8) & 0xff;
     ptr[27] = maxLatencyUs & 0xff;
 
-    mNetSession->sendRequest(mRTCPSessionID, buf->data(), buf->size());
+    status_t err = mNetSession->sendRequest(mRTCPSessionID, buf->data(), buf->size());
+    //ALOGD("informSender session[%d] result[%d] <<<<<<>>>>>>", mRTCPSessionID, err);
 
     return OK;
 }
@@ -1052,7 +1053,8 @@ void RTPReceiver::onSendRR() {
 
     addSDES(buf);
 
-    mNetSession->sendRequest(mRTCPSessionID, buf->data(), buf->size());
+    status_t err = mNetSession->sendRequest(mRTCPSessionID, buf->data(), buf->size());
+    //ALOGD("onSendRR session[%d] result[%d] <<<<<<>>>>>>", mRTCPSessionID, err);
 
     scheduleSendRR();
 }
@@ -1111,7 +1113,8 @@ void RTPReceiver::requestRetransmission(uint32_t senderSSRC, int32_t extSeqNo) {
 
     buf->setRange(0, 16);
 
-     mNetSession->sendRequest(mRTCPSessionID, buf->data(), buf->size());
+    status_t err = mNetSession->sendRequest(mRTCPSessionID, buf->data(), buf->size());
+    //ALOGD("requestRetransmission session[%d] result[%d] <<<<<<>>>>>>", mRTCPSessionID, err);
 }
 
 void RTPReceiver::Source::modifyPacketStatus(int32_t extSeqNo, uint32_t mask) {
