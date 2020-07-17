@@ -17,7 +17,7 @@ cc_library_static {
 
     static_libs: ["libyuv_static"],
 
-    cflags: ["-Werror"],
+    cflags: ["-Werror", "-DLOG_NDEBUG=0"],
 
     sanitize: {
         misc_undefined: [

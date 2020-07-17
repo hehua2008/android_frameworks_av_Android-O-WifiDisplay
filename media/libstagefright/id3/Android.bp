@@ -6,6 +6,7 @@ cc_library_static {
     cflags: [
         "-Werror",
         "-Wall",
+        "-DLOG_NDEBUG=0",
     ],
     sanitize: {
         misc_undefined: [

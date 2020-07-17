@@ -10,6 +10,7 @@ LOCAL_C_INCLUDES += \
 
 LOCAL_MODULE:= libstagefright_codec2
 LOCAL_CFLAGS += -Werror -Wall
+LOCAL_CFLAGS += -DLOG_NDEBUG=0
 LOCAL_CLANG := true
 LOCAL_SANITIZE := unsigned-integer-overflow signed-integer-overflow cfi
 LOCAL_SANITIZE_DIAG := cfi

@@ -139,6 +139,7 @@ cc_library_shared {
         "-Werror",
         "-Wno-error=deprecated-declarations",
         "-Wall",
+        "-DLOG_NDEBUG=0",
     ],
 
     product_variables: {

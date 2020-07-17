@@ -17,6 +17,7 @@ cc_library_shared {
     cflags: [
         "-Werror",
         "-Wall",
+        "-DLOG_NDEBUG=0",
     ],
 
     sanitize: {

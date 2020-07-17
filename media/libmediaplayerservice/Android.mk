@@ -60,6 +60,7 @@ LOCAL_C_INCLUDES :=                                                 \
     external/tremolo/Tremolo                                 \
 
 LOCAL_CFLAGS += -Werror -Wno-error=deprecated-declarations -Wall
+LOCAL_CFLAGS += "-DLOG_NDEBUG=0"
 
 LOCAL_MODULE:= libmediaplayerservice
 

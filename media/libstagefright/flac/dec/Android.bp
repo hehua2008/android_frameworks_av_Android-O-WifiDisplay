@@ -14,7 +14,7 @@ cc_library_shared {
         "frameworks/av/media/libstagefright/include",
     ],
 
-    cflags: ["-Werror"],
+    cflags: ["-Werror", "-DLOG_NDEBUG=0"],
 
     sanitize: {
         misc_undefined: [

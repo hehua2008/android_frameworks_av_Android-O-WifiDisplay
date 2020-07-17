@@ -15,6 +15,7 @@ cc_library_static {
         "-Wno-multichar",
         "-Werror",
         "-Wall",
+        "-DLOG_NDEBUG=0",
     ],
 
     sanitize: {

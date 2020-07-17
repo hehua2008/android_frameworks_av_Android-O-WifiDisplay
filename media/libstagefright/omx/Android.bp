@@ -77,6 +77,7 @@ cc_library_shared {
         "-Wall",
         "-Wno-unused-parameter",
         "-Wno-documentation",
+        "-DLOG_NDEBUG=0",
     ],
 
     sanitize: {
