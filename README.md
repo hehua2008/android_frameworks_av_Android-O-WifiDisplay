@@ -1,6 +1,6 @@
 # android_frameworks_av_Android-O-WifiDisplay
-Support WifiDisplay Source/Sink on Android O
+Support WifiDisplay Source/Sink on Android O.
 
-Fixed some compatibility issues when porting to Android O.
+Fixed some compatibility issues when porting WifiDisplay Source/Sink code to Android O.
 
 See more: https://github.com/kensuke/How-to-Miracast-on-AOSP/wiki
