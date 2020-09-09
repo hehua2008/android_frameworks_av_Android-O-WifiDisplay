@@ -418,13 +418,8 @@ void WifiDisplaySource::onMessageReceived(const sp<AMessage> &msg) {
                     } else {
                         size_t width, height;
 
-                        CHECK(VideoFormats::GetConfiguration(
-                                    mChosenVideoResolutionType,
-                                    mChosenVideoResolutionIndex,
-                                    &width,
-                                    &height,
-                                    NULL /* framesPerSecond */,
-                                    NULL /* interlaced */));
+                        width = mChosenVideoConfig->width;
+                        height = mChosenVideoConfig->height;
 
                         mClient->onDisplayConnected(
                                 mClientInfo.mPlaybackSession
@@ -576,6 +571,7 @@ status_t WifiDisplaySource::sendM1(int32_t sessionID) {
 
     status_t err =
         mNetSession->sendRequest(sessionID, request.c_str(), request.size());
+    ALOGD("sendM1 session[%d] result[%d]: >>>>>>------\n%s------>>>>>>", sessionID, err, request.c_str());
 
     if (err != OK) {
         return err;
@@ -606,6 +602,7 @@ status_t WifiDisplaySource::sendM3(int32_t sessionID) {
 
     status_t err =
         mNetSession->sendRequest(sessionID, request.c_str(), request.size());
+    ALOGD("sendM3 session[%d] result[%d]: >>>>>>------\n%s------>>>>>>", sessionID, err, request.c_str());
 
     if (err != OK) {
         return err;
@@ -637,6 +634,13 @@ status_t WifiDisplaySource::sendM4(int32_t sessionID) {
 
         body.append(chosenVideoFormat.getFormatSpec(true /* forM4Message */));
         body.append("\r\n");
+
+        body.append(AStringPrintf("custom_video_formats: %d %d %d %d %d\r\n",
+                mChosenVideoConfig->width,
+                mChosenVideoConfig->height,
+                mChosenVideoConfig->framesPerSecond,
+                mChosenVideoConfig->profileType,
+                mChosenVideoConfig->levelType));
     }
 
     if (mSinkSupportsAudio) {
@@ -666,6 +670,7 @@ status_t WifiDisplaySource::sendM4(int32_t sessionID) {
 
     status_t err =
         mNetSession->sendRequest(sessionID, request.c_str(), request.size());
+    ALOGD("sendM4 session[%d] result[%d]: >>>>>>------\n%s------>>>>>>", sessionID, err, request.c_str());
 
     if (err != OK) {
         return err;
@@ -712,6 +717,7 @@ status_t WifiDisplaySource::sendTrigger(
 
     status_t err =
         mNetSession->sendRequest(sessionID, request.c_str(), request.size());
+    ALOGD("sendTrigger session[%d] result[%d]: >>>>>>------\n%s------>>>>>>", sessionID, err, request.c_str());
 
     if (err != OK) {
         return err;
@@ -736,6 +742,7 @@ status_t WifiDisplaySource::sendM16(int32_t sessionID) {
 
     status_t err =
         mNetSession->sendRequest(sessionID, request.c_str(), request.size());
+    ALOGD("sendM16 session[%d] result[%d]: >>>>>>------\n%s------>>>>>>", sessionID, err, request.c_str());
 
     if (err != OK) {
         return err;
@@ -844,38 +851,52 @@ status_t WifiDisplaySource::onReceiveM3Response(
     mWfdClientRtpPorts = value;
     mChosenRTPPort = port0;
 
-    if (!params->findParameter("wfd_video_formats", &value)) {
-        ALOGE("Sink doesn't report its choice of wfd_video_formats.");
-        return ERROR_MALFORMED;
-    }
-
     mSinkSupportsVideo = false;
 
-    if  (!(value == "none")) {
+    if (params->findParameter("custom_video_formats", &value)
+        && sscanf(value.c_str(), "%d %d %d %d %d",
+                &mChosenVideoConfig->width,
+                &mChosenVideoConfig->height,
+                &mChosenVideoConfig->framesPerSecond,
+                &mChosenVideoProfile,
+                &mChosenVideoLevel) == 5) {
+        ALOGW("Sink report its choice of custom_video_formats: %s", value.c_str());
+        mChosenVideoConfig->profileType = mChosenVideoProfile;
+        mChosenVideoConfig->levelType = mChosenVideoLevel;
         mSinkSupportsVideo = true;
-        if (!mSupportedSinkVideoFormats.parseFormatSpec(value.c_str())) {
-            ALOGE("Failed to parse sink provided wfd_video_formats (%s)",
-                  value.c_str());
+    } else {
+        ALOGW("Sink doesn't report its choice of custom_video_formats: %s", value.c_str());
 
+        if (!params->findParameter("wfd_video_formats", &value)) {
+            ALOGE("Sink doesn't report its choice of wfd_video_formats.");
             return ERROR_MALFORMED;
         }
 
-        if (!VideoFormats::PickBestFormat(
+        if  (!(value == "none")) {
+            mSinkSupportsVideo = true;
+            if (!mSupportedSinkVideoFormats.parseFormatSpec(value.c_str())) {
+                ALOGE("Failed to parse sink provided wfd_video_formats (%s)",
+                      value.c_str());
+
+                return ERROR_MALFORMED;
+            }
+
+            if (!VideoFormats::PickBestFormat(
                     mSupportedSinkVideoFormats,
                     mSupportedSourceVideoFormats,
                     &mChosenVideoResolutionType,
                     &mChosenVideoResolutionIndex,
                     &mChosenVideoProfile,
                     &mChosenVideoLevel)) {
-            ALOGE("Sink and source share no commonly supported video "
-                  "formats.");
+                ALOGE("Sink and source share no commonly supported video "
+                      "formats.");
 
-            return ERROR_UNSUPPORTED;
-        }
+                return ERROR_UNSUPPORTED;
+            }
 
-        size_t width, height, framesPerSecond;
-        bool interlaced;
-        CHECK(VideoFormats::GetConfiguration(
+            size_t width, height, framesPerSecond;
+            bool interlaced;
+            CHECK(VideoFormats::GetConfiguration(
                     mChosenVideoResolutionType,
                     mChosenVideoResolutionIndex,
                     &width,
@@ -883,13 +904,21 @@ status_t WifiDisplaySource::onReceiveM3Response(
                     &framesPerSecond,
                     &interlaced));
 
-        ALOGI("Picked video resolution %zu x %zu %c%zu",
-              width, height, interlaced ? 'i' : 'p', framesPerSecond);
+            ALOGI("Picked video resolution %zu x %zu %c%zu",
+                  width, height, interlaced ? 'i' : 'p', framesPerSecond);
 
-        ALOGI("Picked AVC profile %d, level %d",
-              mChosenVideoProfile, mChosenVideoLevel);
-    } else {
-        ALOGI("Sink doesn't support video at all.");
+            ALOGI("Picked AVC profile %d, level %d",
+                  mChosenVideoProfile, mChosenVideoLevel);
+
+            mChosenVideoConfig->width = width;
+            mChosenVideoConfig->height = height;
+            mChosenVideoConfig->framesPerSecond = framesPerSecond;
+            mChosenVideoConfig->interlaced = interlaced;
+            mChosenVideoConfig->profileType = mChosenVideoProfile;
+            mChosenVideoConfig->levelType = mChosenVideoLevel;
+        } else {
+            ALOGI("Sink doesn't support video at all.");
+        }
     }
 
     if (!params->findParameter("wfd_audio_codecs", &value)) {
@@ -1050,15 +1079,12 @@ status_t WifiDisplaySource::onReceiveClientData(const sp<AMessage> &msg) {
     sp<ParsedMessage> data =
         static_cast<ParsedMessage *>(obj.get());
 
-    ALOGV("session %d received '%s'",
+    ALOGV("onReceiveClientData session %d received <<<<<<------\n%s------<<<<<<",
           sessionID, data->debugString().c_str());
 
     AString method;
     AString uri;
     data->getRequestField(0, &method);
-
-    //ALOGD("onReceiveClientData() session[%d] method[%s] <<<<<<------", sessionID, method.c_str());
-    //ALOGD("%s------>>>>>>", data->debugString().c_str());
 
     int32_t cseq;
     if (!data->findInt32("cseq", &cseq)) {
@@ -1149,6 +1175,7 @@ status_t WifiDisplaySource::onOptionsRequest(
     response.append("\r\n");
 
     status_t err = mNetSession->sendRequest(sessionID, response.c_str());
+    ALOGD("onOptionsRequest session[%d] result[%d]: >>>>>>------\n%s------>>>>>>", sessionID, err, response.c_str());
 
     if (err == OK) {
         err = sendM3(sessionID);
@@ -1279,10 +1306,7 @@ status_t WifiDisplaySource::onSetupRequest(
             mSinkSupportsAudio,
             mUsingPCMAudio,
             mSinkSupportsVideo,
-            mChosenVideoResolutionType,
-            mChosenVideoResolutionIndex,
-            mChosenVideoProfile,
-            mChosenVideoLevel);
+            mChosenVideoConfig);
 
     if (err != OK) {
         looper()->unregisterHandler(playbackSession->id());
@@ -1339,6 +1363,7 @@ status_t WifiDisplaySource::onSetupRequest(
     response.append("\r\n");
 
     err = mNetSession->sendRequest(sessionID, response.c_str());
+    ALOGD("onSetupRequest session[%d] result[%d]: >>>>>>------\n%s------>>>>>>", sessionID, err, response.c_str());
 
     if (err != OK) {
         return err;
@@ -1389,6 +1414,7 @@ status_t WifiDisplaySource::onPlayRequest(
     response.append("\r\n");
 
     status_t err = mNetSession->sendRequest(sessionID, response.c_str());
+    ALOGD("onPlayRequest session[%d] result[%d]: >>>>>>------\n%s------>>>>>>", sessionID, err, response.c_str());
 
     if (err != OK) {
         return err;
@@ -1440,6 +1466,7 @@ status_t WifiDisplaySource::onPauseRequest(
     response.append("\r\n");
 
     err = mNetSession->sendRequest(sessionID, response.c_str());
+    ALOGD("onPauseRequest session[%d] result[%d]: >>>>>>------\n%s------>>>>>>", sessionID, err, response.c_str());
 
     if (err != OK) {
         return err;
@@ -1470,7 +1497,8 @@ status_t WifiDisplaySource::onTeardownRequest(
     response.append("Connection: close\r\n");
     response.append("\r\n");
 
-    mNetSession->sendRequest(sessionID, response.c_str());
+    status_t err = mNetSession->sendRequest(sessionID, response.c_str());
+    ALOGD("onTeardownRequest session[%d] result[%d]: >>>>>>------\n%s------>>>>>>", sessionID, err, response.c_str());
 
     if (mState == AWAITING_CLIENT_TEARDOWN) {
         CHECK(mStopReplyID != NULL);
@@ -1546,6 +1574,7 @@ status_t WifiDisplaySource::onGetParameterRequest(
     response.append("\r\n");
 
     status_t err = mNetSession->sendRequest(sessionID, response.c_str());
+    ALOGD("onGetParameterRequest session[%d] result[%d]: >>>>>>------\n%s------>>>>>>", sessionID, err, response.c_str());
     return err;
 }
 
@@ -1573,6 +1602,7 @@ status_t WifiDisplaySource::onSetParameterRequest(
     response.append("\r\n");
 
     status_t err = mNetSession->sendRequest(sessionID, response.c_str());
+    ALOGD("onSetParameterRequest session[%d] result[%d]: >>>>>>------\n%s------>>>>>>", sessionID, err, response.c_str());
     return err;
 }
 
@@ -1615,7 +1645,8 @@ void WifiDisplaySource::sendErrorResponse(
 
     response.append("\r\n");
 
-    mNetSession->sendRequest(sessionID, response.c_str());
+    status_t err = mNetSession->sendRequest(sessionID, response.c_str());
+    ALOGD("sendErrorResponse session[%d] result[%d]: >>>>>>------\n%s------>>>>>>", sessionID, err, response.c_str());
 }
 
 int32_t WifiDisplaySource::makeUniquePlaybackSessionID() const {

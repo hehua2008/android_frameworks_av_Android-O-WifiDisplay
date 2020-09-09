@@ -746,10 +746,10 @@ status_t Converter::doMoreWork() {
             }
 
             buffer->meta()->setInt64("timeUs", timeUs);
-
+#if 0
             ALOGV("[%s] time %lld us (%.2f secs)",
                     mIsVideo ? "video" : "audio", (long long)timeUs, timeUs / 1E6);
-
+#endif
             memcpy(buffer->data(), outbuf->base() + offset, size);
 
             if (flags & MediaCodec::BUFFER_FLAG_CODECCONFIG) {

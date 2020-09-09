@@ -140,6 +140,8 @@ private:
     VideoFormats::ProfileType mChosenVideoProfile;
     VideoFormats::LevelType mChosenVideoLevel;
 
+    sp<VideoFormats::FormatConfig> mChosenVideoConfig = new VideoFormats::FormatConfig;
+
     bool mSinkSupportsAudio;
 
     bool mUsingPCMAudio;

@@ -21,6 +21,7 @@
 #include <media/stagefright/foundation/ABase.h>
 
 #include <stdint.h>
+#include <utils/RefBase.h>
 
 namespace android {
 
@@ -62,6 +63,13 @@ struct VideoFormats {
         RESOLUTION_VESA,
         RESOLUTION_HH,
         kNumResolutionTypes,
+    };
+
+    struct FormatConfig : public RefBase{
+        size_t width, height, framesPerSecond;
+        bool interlaced;
+        ProfileType profileType;
+        LevelType levelType;
     };
 
     void setNativeResolution(ResolutionType type, size_t index);

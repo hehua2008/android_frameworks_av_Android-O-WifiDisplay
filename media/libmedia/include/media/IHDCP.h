@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+#ifndef IHDCP_H_
+
+#define IHDCP_H_
+
 #include <binder/IInterface.h>
 #include <media/hardware/HDCPAPI.h>
 #include <media/stagefright/foundation/ABase.h>
@@ -117,4 +121,4 @@ struct BnHDCP : public BnInterface<IHDCP> {
 
 }  // namespace android
 
-
+#endif  // IHDCP_H_

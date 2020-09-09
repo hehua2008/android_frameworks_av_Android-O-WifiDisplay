@@ -187,11 +187,11 @@ void MediaPuller::onMessageReceived(const sp<AMessage> &msg) {
                 notify->setInt32("what", kWhatAccessUnit);
                 notify->setBuffer("accessUnit", accessUnit);
                 notify->post();
-
+#if 0
                 if (mbuf != NULL) {
                     ALOGV("posted mbuf %p", mbuf);
                 }
-
+#endif
                 schedulePull();
             }
             break;

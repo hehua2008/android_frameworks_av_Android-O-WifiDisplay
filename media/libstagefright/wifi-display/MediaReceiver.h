@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
+#ifndef MEDIA_RECEIVER_H_
+
+#define MEDIA_RECEIVER_H_
+
 #include <media/stagefright/foundation/AHandler.h>
 
 #include "ATSParser.h"
+
 #include "rtp/RTPReceiver.h"
 
 namespace android {
@@ -109,3 +114,4 @@ private:
 
 }  // namespace android
 
+#endif  // MEDIA_RECEIVER_H_

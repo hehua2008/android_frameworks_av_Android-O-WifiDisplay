@@ -464,8 +464,9 @@ status_t RTPSender::sendRTPPacket(
     status_t err = mNetSession->sendRequest(
             mRTPSessionID, buffer->data(), buffer->size(),
             timeValid, timeUs);
-    //ALOGD("sendRTPPacket session[%d] result[%d] <<<<<<>>>>>>", mRTPSessionID, err);
-
+#if 0
+    ALOGD("sendRTPPacket session[%d] result[%d] >>>>>>>>>>>>", mRTPSessionID, err);
+#endif
     if (err != OK) {
         return err;
     }

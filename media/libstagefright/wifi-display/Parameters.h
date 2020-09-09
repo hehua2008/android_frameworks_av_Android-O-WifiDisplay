@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+#ifndef PARAMETERS_H_
+
+#define PARAMETERS_H_
+
 #include <media/stagefright/foundation/ABase.h>
 #include <media/stagefright/foundation/AString.h>
 #include <utils/KeyedVector.h>
@@ -39,3 +43,5 @@ private:
 };
 
 }  // namespace android
+
+#endif  // PARAMETERS_H_

@@ -156,6 +156,13 @@ status_t DirectRenderer::DecoderContext::init(
 
     AString mime;
     CHECK(format->findString("mime", &mime));
+    ALOGD("Init decoder mime=%s", mime.c_str());
+
+    int32_t width;
+    int32_t height;
+    format->findInt32("width", &width);
+    format->findInt32("height", &height);
+    ALOGD("Init decoder width=%d, height=%d", width, height);
 
     mDecoderLooper = new ALooper;
     mDecoderLooper->setName("video codec looper");

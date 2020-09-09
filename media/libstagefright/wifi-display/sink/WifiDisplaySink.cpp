@@ -42,12 +42,14 @@ WifiDisplaySink::WifiDisplaySink(
         uint32_t flags,
         const sp<ANetworkSession> &netSession,
         const sp<IGraphicBufferProducer> &bufferProducer,
-        const sp<AMessage> &notify)
+        const sp<AMessage> &notify,
+        const sp<VideoFormats::FormatConfig> &videoConfig)
     : mState(UNDEFINED),
       mFlags(flags),
       mNetSession(netSession),
       mSurfaceTex(bufferProducer),
       mNotify(notify),
+      mVideoConfig(videoConfig),
       mUsingTCPTransport(false),
       mUsingTCPInterleaving(false),
       mSessionID(0),
@@ -273,7 +275,7 @@ void WifiDisplaySink::onMessageReceived(const sp<AMessage> &msg) {
         case kWhatReportLateness:
         {
             if (mLatencyCount > 0) {
-                int64_t avgLatencyUs = mLatencySumUs / mLatencyCount;
+                int64_t avgLatencyUs = mLatencySumUs / (int32_t) mLatencyCount;
 
                 ALOGV("avg. latency = %lld ms (max %lld ms)",
                       avgLatencyUs / 1000ll,
@@ -435,7 +437,7 @@ status_t WifiDisplaySink::sendM2(int32_t sessionID) {
 
     status_t err =
         mNetSession->sendRequest(sessionID, request.c_str(), request.size());
-    //ALOGD("sendM2 session[%d] result[%d]: <<<<<<------\n%s------>>>>>>", sessionID, err, request.c_str());
+    ALOGD("sendM2 session[%d] result[%d]: >>>>>>------\n%s------>>>>>>", sessionID, err, request.c_str());
 
     if (err != OK) {
         return err;
@@ -586,7 +588,7 @@ void WifiDisplaySink::onReceiveClientData(const sp<AMessage> &msg) {
     sp<ParsedMessage> data =
         static_cast<ParsedMessage *>(obj.get());
 
-    ALOGV("session %d received '%s'",
+    ALOGV("session %d received <<<<<<------\n%s------<<<<<<",
           sessionID, data->debugString().c_str());
 
     AString method;
@@ -648,7 +650,7 @@ void WifiDisplaySink::onOptionsRequest(
     response.append("\r\n");
 
     status_t err = mNetSession->sendRequest(sessionID, response.c_str());
-    //ALOGD("onOptionsRequest session[%d] result[%d]: <<<<<<------\n%s------>>>>>>", sessionID, err, response.c_str());
+    ALOGD("onOptionsRequest session[%d] result[%d]: >>>>>>------\n%s------>>>>>>", sessionID, err, response.c_str());
     CHECK_EQ(err, (status_t)OK);
 
     err = sendM2(sessionID);
@@ -683,6 +685,15 @@ void WifiDisplaySink::onGetParameterRequest(
         body = "wfd_video_formats: ";
         body.append(mSinkSupportedVideoFormats.getFormatSpec());
 
+        if (mVideoConfig != NULL) {
+            body.append(AStringPrintf("\r\ncustom_video_formats: %d %d %d %d %d",
+                                      mVideoConfig->width,
+                                      mVideoConfig->height,
+                                      mVideoConfig->framesPerSecond,
+                                      mVideoConfig->profileType,
+                                      mVideoConfig->levelType));
+        }
+
         body.append(
                 "\r\nwfd_audio_codecs: AAC 0000000F 00\r\n"
                 "wfd_client_rtp_ports: RTP/AVP/");
@@ -709,7 +720,7 @@ void WifiDisplaySink::onGetParameterRequest(
     response.append(body);
 
     status_t err = mNetSession->sendRequest(sessionID, response.c_str());
-    //ALOGD("onGetParameterRequest session[%d] result[%d]: <<<<<<------\n%s------>>>>>>", sessionID, err, response.c_str());
+    ALOGD("onGetParameterRequest session[%d] result[%d]: >>>>>>------\n%s------>>>>>>", sessionID, err, response.c_str());
     CHECK_EQ(err, (status_t)OK);
 }
 
@@ -787,7 +798,7 @@ status_t WifiDisplaySink::sendSetup(int32_t sessionID, const char *uri) {
     ALOGV("request = '%s'", request.c_str());
 
     err = mNetSession->sendRequest(sessionID, request.c_str(), request.size());
-    //ALOGD("sendSetup session[%d] result[%d]: <<<<<<------\n%s------>>>>>>", sessionID, err, request.c_str());
+    ALOGD("sendSetup session[%d] result[%d]: >>>>>>------\n%s------>>>>>>", sessionID, err, request.c_str());
 
     if (err != OK) {
         return err;
@@ -811,7 +822,7 @@ status_t WifiDisplaySink::sendPlay(int32_t sessionID, const char *uri) {
 
     status_t err =
         mNetSession->sendRequest(sessionID, request.c_str(), request.size());
-    //ALOGD("sendPlay session[%d] result[%d]: <<<<<<------\n%s------>>>>>>", sessionID, err, request.c_str());
+    ALOGD("sendPlay session[%d] result[%d]: >>>>>>------\n%s------>>>>>>", sessionID, err, request.c_str());
 
     if (err != OK) {
         return err;
@@ -841,7 +852,7 @@ status_t WifiDisplaySink::sendIDRFrameRequest(int32_t sessionID) {
 
     status_t err =
         mNetSession->sendRequest(sessionID, request.c_str(), request.size());
-    //ALOGD("sendIDRFrameRequest session[%d] result[%d]: <<<<<<------\n%s------>>>>>>", sessionID, err, request.c_str());
+    ALOGD("sendIDRFrameRequest session[%d] result[%d]: >>>>>>------\n%s------>>>>>>", sessionID, err, request.c_str());
 
     if (err != OK) {
         return err;
@@ -883,7 +894,7 @@ void WifiDisplaySink::onSetParameterRequest(
     response.append("\r\n");
 
     status_t err = mNetSession->sendRequest(sessionID, response.c_str());
-    //ALOGD("onSetParameterRequest session[%d] result[%d]: <<<<<<------\n%s------>>>>>>", sessionID, err, response.c_str());
+    ALOGD("onSetParameterRequest session[%d] result[%d]: >>>>>>------\n%s------>>>>>>", sessionID, err, response.c_str());
     CHECK_EQ(err, (status_t)OK);
 }
 
@@ -901,7 +912,7 @@ void WifiDisplaySink::sendErrorResponse(
     response.append("\r\n");
 
     status_t err = mNetSession->sendRequest(sessionID, response.c_str());
-    //ALOGD("sendErrorResponse session[%d] result[%d]: <<<<<<------\n%s------>>>>>>", sessionID, err, response.c_str());
+    ALOGD("sendErrorResponse session[%d] result[%d]: >>>>>>------\n%s------>>>>>>", sessionID, err, response.c_str());
     CHECK_EQ(err, (status_t)OK);
 }
 

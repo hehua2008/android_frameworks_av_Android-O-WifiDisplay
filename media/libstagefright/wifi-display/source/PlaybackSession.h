@@ -54,10 +54,7 @@ struct WifiDisplaySource::PlaybackSession : public AHandler {
             bool enableAudio,
             bool usePCMAudio,
             bool enableVideo,
-            VideoFormats::ResolutionType videoResolutionType,
-            size_t videoResolutionIndex,
-            VideoFormats::ProfileType videoProfileType,
-            VideoFormats::LevelType videoLevelType);
+            sp<VideoFormats::FormatConfig> videoConfig);
 
     void destroyAsync();
 
@@ -135,10 +132,7 @@ private:
             bool enableAudio,
             bool usePCMAudio,
             bool enableVideo,
-            VideoFormats::ResolutionType videoResolutionType,
-            size_t videoResolutionIndex,
-            VideoFormats::ProfileType videoProfileType,
-            VideoFormats::LevelType videoLevelType);
+            sp<VideoFormats::FormatConfig> videoConfig);
 
     status_t addSource(
             bool isVideo,
@@ -151,10 +145,7 @@ private:
             size_t *numInputBuffers);
 
     status_t addVideoSource(
-            VideoFormats::ResolutionType videoResolutionType,
-            size_t videoResolutionIndex,
-            VideoFormats::ProfileType videoProfileType,
-            VideoFormats::LevelType videoLevelType);
+            sp<VideoFormats::FormatConfig> videoConfig);
 
     status_t addAudioSource(bool usePCMAudio);
 

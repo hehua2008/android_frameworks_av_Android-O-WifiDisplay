@@ -1217,10 +1217,9 @@ status_t ANetworkSession::sendRequest(
 
     status_t err = session->sendRequest(data, size, timeValid, timeUs);
 
-    interrupt();
+    //ALOGD("sendRequest session[%d] result[%d]: >>>>>>------\n%s------>>>>>>", sessionID, err, (const char *)data);
 
-    //ALOGD("sendRequest() session[%d] result[%d]: <<<<<<------", sessionID, err);
-    //ALOGD("%s------>>>>>>", (const char *)data);
+    interrupt();
 
     return err;
 }

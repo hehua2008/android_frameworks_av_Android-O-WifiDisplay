@@ -172,9 +172,11 @@ void RTPReceiver::Source::onMessageReceived(const sp<AMessage> &msg) {
 
             cancelTimers();
 
+#if TRACK_PACKET_LOSS
             ALOGV("Lost packet extSeqNo %d %s",
                   mAwaitingExtSeqNo,
                   mRequestedRetransmission ? "*" : "");
+#endif
 
             mRequestedRetransmission = false;
             if (mActiveAssembler != NULL) {
@@ -391,10 +393,12 @@ void RTPReceiver::Source::dequeueMore() {
 
     CHECK_LT(mAwaitingExtSeqNo, firstPacket->int32Data());
 
+#if TRACK_PACKET_LOSS
     ALOGV("waiting for %d, comparing against %d, %lld us left",
           mAwaitingExtSeqNo,
           firstPacket->int32Data(),
           maxArrivalTimeUs - nowUs);
+#endif
 
     postDeclareLostTimer(maxArrivalTimeUs + kPacketLostAfterUs);
 
@@ -710,7 +714,7 @@ status_t RTPReceiver::informSender(const sp<AMessage> &params) {
     ptr[27] = maxLatencyUs & 0xff;
 
     status_t err = mNetSession->sendRequest(mRTCPSessionID, buf->data(), buf->size());
-    //ALOGD("informSender session[%d] result[%d] <<<<<<>>>>>>", mRTCPSessionID, err);
+    ALOGD("informSender session[%d] result[%d] >>>>>>>>>>>>", mRTCPSessionID, err);
 
     return OK;
 }
@@ -1054,7 +1058,7 @@ void RTPReceiver::onSendRR() {
     addSDES(buf);
 
     status_t err = mNetSession->sendRequest(mRTCPSessionID, buf->data(), buf->size());
-    //ALOGD("onSendRR session[%d] result[%d] <<<<<<>>>>>>", mRTCPSessionID, err);
+    ALOGD("onSendRR session[%d] result[%d] >>>>>>>>>>>>", mRTCPSessionID, err);
 
     scheduleSendRR();
 }
@@ -1114,7 +1118,7 @@ void RTPReceiver::requestRetransmission(uint32_t senderSSRC, int32_t extSeqNo) {
     buf->setRange(0, 16);
 
     status_t err = mNetSession->sendRequest(mRTCPSessionID, buf->data(), buf->size());
-    //ALOGD("requestRetransmission session[%d] result[%d] <<<<<<>>>>>>", mRTCPSessionID, err);
+    ALOGD("requestRetransmission session[%d] result[%d] >>>>>>>>>>>>", mRTCPSessionID, err);
 }
 
 void RTPReceiver::Source::modifyPacketStatus(int32_t extSeqNo, uint32_t mask) {

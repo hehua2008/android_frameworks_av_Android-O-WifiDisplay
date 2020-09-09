@@ -566,9 +566,10 @@ status_t TSPacketizer::packetize(
         }
 
         size_t numPaddingBytes = sizeAvailableForPayload - numBytesOfPayload;
+#if 0
         ALOGV("packet 1 contains %zd padding bytes and %zd bytes of payload",
               numPaddingBytes, numBytesOfPayload);
-
+#endif
         size_t numBytesOfPayloadRemaining = accessUnit->size() - numBytesOfPayload;
 
 #if 0
@@ -589,9 +590,10 @@ status_t TSPacketizer::packetize(
             }
 
             size_t numPaddingBytes = sizeAvailableForPayload - numBytesOfPayload;
+#if 0
             ALOGI("packet %zd contains %zd padding bytes and %zd bytes of payload",
                     numTSPackets + 1, numPaddingBytes, numBytesOfPayload);
-
+#endif
             numBytesOfPayloadRemaining -= numBytesOfPayload;
             ++numTSPackets;
         }

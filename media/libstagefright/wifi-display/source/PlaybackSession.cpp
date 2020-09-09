@@ -379,10 +379,7 @@ status_t WifiDisplaySource::PlaybackSession::init(
         bool enableAudio,
         bool usePCMAudio,
         bool enableVideo,
-        VideoFormats::ResolutionType videoResolutionType,
-        size_t videoResolutionIndex,
-        VideoFormats::ProfileType videoProfileType,
-        VideoFormats::LevelType videoLevelType) {
+        sp<VideoFormats::FormatConfig> videoConfig) {
     sp<AMessage> notify = new AMessage(kWhatMediaSenderNotify, this);
     mMediaSender = new MediaSender(mNetSession, notify);
     looper()->registerHandler(mMediaSender);
@@ -393,10 +390,7 @@ status_t WifiDisplaySource::PlaybackSession::init(
             enableAudio,
             usePCMAudio,
             enableVideo,
-            videoResolutionType,
-            videoResolutionIndex,
-            videoProfileType,
-            videoLevelType);
+            videoConfig);
 
     if (err == OK) {
         err = mMediaSender->initAsync(
@@ -880,10 +874,7 @@ status_t WifiDisplaySource::PlaybackSession::setupPacketizer(
         bool enableAudio,
         bool usePCMAudio,
         bool enableVideo,
-        VideoFormats::ResolutionType videoResolutionType,
-        size_t videoResolutionIndex,
-        VideoFormats::ProfileType videoProfileType,
-        VideoFormats::LevelType videoLevelType) {
+        sp<VideoFormats::FormatConfig> videoConfig) {
     CHECK(enableAudio || enableVideo);
 
     if (!mMediaPath.empty()) {
@@ -892,8 +883,7 @@ status_t WifiDisplaySource::PlaybackSession::setupPacketizer(
 
     if (enableVideo) {
         status_t err = addVideoSource(
-                videoResolutionType, videoResolutionIndex, videoProfileType,
-                videoLevelType);
+                videoConfig);
 
         if (err != OK) {
             return err;
@@ -1021,24 +1011,18 @@ status_t WifiDisplaySource::PlaybackSession::addSource(
 }
 
 status_t WifiDisplaySource::PlaybackSession::addVideoSource(
-        VideoFormats::ResolutionType videoResolutionType,
-        size_t videoResolutionIndex,
-        VideoFormats::ProfileType videoProfileType,
-        VideoFormats::LevelType videoLevelType) {
+        sp<VideoFormats::FormatConfig> videoConfig) {
     size_t width, height, framesPerSecond;
     bool interlaced;
-    CHECK(VideoFormats::GetConfiguration(
-                videoResolutionType,
-                videoResolutionIndex,
-                &width,
-                &height,
-                &framesPerSecond,
-                &interlaced));
+    width = videoConfig->width;
+    height = videoConfig->height;
+    framesPerSecond = videoConfig->framesPerSecond;
+    interlaced = videoConfig->interlaced;
 
     unsigned profileIdc, levelIdc, constraintSet;
     CHECK(VideoFormats::GetProfileLevel(
-                videoProfileType,
-                videoLevelType,
+                videoConfig->profileType,
+                videoConfig->levelType,
                 &profileIdc,
                 &levelIdc,
                 &constraintSet));

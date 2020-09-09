@@ -22,11 +22,11 @@
 
 #include <gui/Surface.h>
 #include <media/stagefright/foundation/AHandler.h>
+#include <media/stagefright/foundation/AMessage.h>
 #include <media/stagefright/foundation/ANetworkSession.h>
 
 namespace android {
 
-struct AMessage;
 struct DirectRenderer;
 struct MediaReceiver;
 struct ParsedMessage;
@@ -52,7 +52,8 @@ struct WifiDisplaySink : public AHandler {
             uint32_t flags,
             const sp<ANetworkSession> &netSession,
             const sp<IGraphicBufferProducer> &bufferProducer = NULL,
-            const sp<AMessage> &notify = NULL);
+            const sp<AMessage> &notify = NULL,
+            const sp<VideoFormats::FormatConfig> &videoConfig = NULL);
 
     void start(const char *sourceHost, int32_t sourcePort);
     void start(const char *uri);
@@ -103,6 +104,7 @@ private:
     sp<ANetworkSession> mNetSession;
     sp<IGraphicBufferProducer> mSurfaceTex;
     sp<AMessage> mNotify;
+    sp<VideoFormats::FormatConfig> mVideoConfig;
     sp<TimeSyncer> mTimeSyncer;
     bool mUsingTCPTransport;
     bool mUsingTCPInterleaving;
